@@ -1,0 +1,44 @@
+---
+title: "Introduction to Data Augmentation"
+author: "Steve Soutar"
+date: "2024-02-07"
+output: html_document
+---
+
+### Data Augmentation
+
+Data augmentation in combination with MCMC sampling, provides a powerful method for posterior estimation of models with latent variables. This is particularly important when computation of the likelihood is difficult. By augmenting the observed data with latent (missing) data a more tractable likelihood can be considered. The latent data is then included in the MCMC sampling scheme as additional parameters to be estimated. The rest of this document provides a brief introduction to the method of data augmentation. 
+
+### Set-Up
+
+We first establish some notation. Let \(i = 1,\ldots,N\) index patients in the cohort. Now let \(t_{i}\) denote the outcome for patient \(i = 1.\ldots,N\) and \(f(t_{i}\,|\,\pmb{\theta}, \pmb{u})\) the likelihood contribution for patient \(i = 1,\ldots,N\). The vector \(\pmb{u} = (u_{1},\ldots,u_{N})\) denotes a vector of latent variables, where we assume that \(u_{i} \sim g(\pmb{\psi})\). As a shorthand we define \(\pmb{t} = (t_{1},\ldots,t_{N})\).
+
+### Observed Data Likelihood
+
+As \(\pmb{u}\) is unobserved one option is to work with the observed likelihood (alternatively marginal likelihood) given below, where \(\pmb{u}\) is marginalised out:
+
+\begin{align}
+f(\pmb{t}\,|\,\pmb{\theta}, \pmb{\psi}) = \int_{\pmb{u}}f(\pmb{t}\,|\,\pmb{\theta}, \pmb{\psi}, \pmb{u})g(\pmb{u}\,|\,\pmb{\psi})\mbox{d}\pmb{u}. 
+\end{align}
+
+\noindent The above equation now becomes the target for inference, where numerical optimisation can be employed to obtain maximum likelihood estimates for \(\pmb{\theta}\) and \(\pmb{\psi}\). However, working with the observed likelihood carries a heavy computational burden, namely computation of the (potentially high dimensional) integral. Often, recourse to methods of numerical integration are required, which become infeasible in a high dimensional setting. 
+
+### Complete Data Likelihood
+
+An alternative to the observed likelihood is to consider inference in the Bayesian framework where the joint posterior of \(\pmb{\theta}, \pmb{\psi}\) and \(\pmb{u}\) becomes the inferential target. In doing so the latent \(\pmb{u}\) are treated as an additional parameters to be estimated. The joint posterior is defined by first specifying the complete data likelihood given below:
+
+\begin{align*}
+f(\pmb{t}, \pmb{u}\,|\,\pmb{\theta}, \pmb{\psi}) = f(\pmb{t}\,|\,\pmb{\theta}, \pmb{u},\pmb{\psi})g(\pmb{u}\,|\,\pmb{\psi}) =
+\left\{\prod_{i = 1}^{N}f(t_{i}\,|\,\pmb{\theta},u_{i})\right\}\left\{\prod_{i = 1}^{N}g(u_{i}\,|\,\pmb{\psi})\right\}.
+\end{align*}
+
+\noident where independence between patients and independence between the components of \(\pmb{u}\) is assumed.
+
+\noindent Upon specifying priors for \(\pmb{\theta}\) and \(\psi\), denoted by \(p(\pmb{\theta})\) and \(p(\pmb{\psi})\) respectively, we have by Bayes theorem that:
+
+\begin{align*}
+\pi(\pmb{\theta}, \pmb{\psi}, \pmb{u}\,|\,\pmb{t}) \propto  \left\{\prod_{i = 1}^{N}f(t_{i}\,|\,\pmb{\theta},u_{i})\right\}\left\{\prod_{i = 1}^{N}g(u_{i}\,|\,\pmb{\psi})\right\}p(\pmb{\theta})p(\pmb{\psi}).
+\end{align*}
+
+\nonindent A posterior sample from the above can be drawn using methods such as MCMC sampling. 
+
