@@ -1,0 +1,28 @@
+---
+title: "Guide to JAGS code"
+author: "Steve Soutar"
+date: "2024-02-08"
+output: html_document
+---
+
+### Likelihood specification
+
+The model specified in the JAGS code is a proportional hazards model with exponential baseline. The likelihood for patient \(i\) is specified in terms of the hazard, cumulative hazard, and survival functions, given below:
+
+\begin{align*}
+f(t_{i}\,|\,\ldots) &= h(t_{i})^{\delta_{i}}S(t_{i}) \\
+&= \lambda^{\delta_{i}}_{i}\mbox{exp}(-H(t_{i})).
+\end{align*}
+
+\noindent where \(h\), \(H\) and \(S\) denote the hazard, cumulative hazard and survival functions respectively, and \(\delta_{i}\) a censoring indicator. In the above we have used the fact that \(S(t_{i}) = \mbox{exp}(-H(t_{i}))\) and \(h(t_{i}) = \lambda_{i}\) for an exponential model. It follows that the log-likelihood contribution for patient \(i\) is given below:
+
+\begin{align}
+\mathcal{LL}_{i} &= \delta_{i}\mbox{log}(\lambda_{i}) - H(t_{i}) \\
+&= \delta_{i}\mbox{log}(\lambda_{i}) - \lambda_{i}t_{i}
+\end{align}
+
+\noindent In the above we have used the fact \(H(t_{i}) = \lambda_{i}t_{i}\). 
+
+### Zeros trick
+
+The specified likelihood can not be directly coded in JAGS. However, a work-around exists in the form of the 'zeros trick'. The zeros trick allows for the specification of bespoke likelihoods within JAGS. An alternative to the zeros trick is given by the 'ones trick'. The zeros trick is founded upon the observation that for a poisson model with rate \(\phi\) and \(X \sim \mbox{Pois}(\phi)\), we have that \(\mbox{Pr}(X = 0) = \mbox{exp}(-\phi)\). Using this observation we define \(\phi_{i} = -\mathcal{LL}_{i}\) and recover the correct likelihood contribution. Note that an arbitrarily large constant \(C\) is added to \(\phi_{i}\) to guarantee \(\phi_{i} > 0\). 
